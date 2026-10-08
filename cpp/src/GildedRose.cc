@@ -4,44 +4,28 @@
 #include "Conjured.h"
 #include "BackstagePasses.h"
 #include "Normal.h"
+#include "ContentsFactory.h"
 
 using namespace std;
 
-GildedRose::GildedRose(vector<Item> & items) : items(items)
+GildedRose::GildedRose(vector<Item>& items, ContentsFactory& factory)
+    : items(items), factory(factory)
 {}
-
-void GildedRose::updateQuality()
-{
-    for (int i = 0; i < items.size(); i++)
+    void GildedRose::updateQuality()
     {
+        for (int i = 0; i < items.size(); i++)
+        {
+            UpdateStrategy* strategy = factory.createContents(
+                items[i].name,
+                items[i].quality,
+                items[i].sellIn
+            );
 
-        if (items[i].name == "Aged Brie")
-        {
-            AgedBrie strategy(items[i].quality);
-            strategy.updateQuality();
-        }
-        else if (items[i].name == "Sulfuras, Hand of Ragnaros")
-        {
-            Sulfuras strategy;
-            strategy.updateQuality();
-        }
-        else if (items[i].name == "Backstage passes to a TAFKAL80ETC concert")
-        {
-            BackstagePasses strategy(items[i].quality, items[i].sellIn);
-            strategy.updateQuality();
-        }
-        else if (items[i].name == "Conjured Mana Cake")
-        {
-            Conjured strategy(items[i].quality);
-            strategy.updateQuality();
-        }
-        else
-        {
-            Normal strategy(items[i].quality);
-            strategy.updateQuality();
-        }
+            strategy->updateQuality();
 
-        if (items[i].name != "Sulfuras, Hand of Ragnaros") items[i].sellIn -= 1;
+            if (items[i].name != "Sulfuras, Hand of Ragnaros")
+                items[i].sellIn -= 1;
 
+            delete strategy;
+        }
     }
-}
